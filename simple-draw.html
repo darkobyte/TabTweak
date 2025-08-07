@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Drawer</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #canvas {
+            border: 2px solid #333;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            margin-bottom: 20px;
+        }
+
+        #textInput {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pixel Drawer</h1>
+        <canvas id="canvas" width="320" height="320"></canvas>
+        <input type="text" id="textInput" placeholder="Enter title text..." maxlength="50">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('textInput');
+
+        // 16x16 grid, scaled up to 320x320 (20px per pixel)
+        const gridSize = 16;
+        const pixelSize = 20;
+
+        // Drawing state
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let pixelData = new Array(gridSize * gridSize).fill('#ffffff');
+
+        // Initialize canvas
+        ctx.imageSmoothingEnabled = false;
+        drawGrid();
+
+        // Load saved data
+        loadFromStorage();
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pixels
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const index = i * gridSize + j;
+                    ctx.fillStyle = pixelData[index];
+                    ctx.fillRect(j * pixelSize, i * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            // Draw grid lines
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * pixelSize, 0);
+                ctx.lineTo(i * pixelSize, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * pixelSize);
+                ctx.lineTo(canvas.width, i * pixelSize);
+                ctx.stroke();
+            }
+        }
+
+        function getPixelPosition(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((event.clientX - rect.left) / pixelSize);
+            const y = Math.floor((event.clientY - rect.top) / pixelSize);
+            return { x, y };
+        }
+
+        function setPixel(x, y, color) {
+            if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                const index = y * gridSize + x;
+                pixelData[index] = color;
+                drawGrid();
+                saveToStorage();
+                updateFavicon();
+            }
+        }
+
+        function updateFavicon() {
+            // Create a smaller canvas for favicon
+            const faviconCanvas = document.createElement('canvas');
+            faviconCanvas.width = 16;
+            faviconCanvas.height = 16;
+            const faviconCtx = faviconCanvas.getContext('2d');
+
+            // Draw the pixel art scaled down to 16x16
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const index = i * gridSize + j;
+                    faviconCtx.fillStyle = pixelData[index];
+                    faviconCtx.fillRect(j, i, 1, 1);
+                }
+            }
+
+            // Update favicon
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/png';
+            link.rel = 'shortcut icon';
+            link.href = faviconCanvas.toDataURL();
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }
+
+        function updateTitle() {
+            const title = textInput.value.trim() || 'Pixel Drawer';
+            document.title = title;
+            saveToStorage();
