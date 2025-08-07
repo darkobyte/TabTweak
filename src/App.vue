@@ -196,6 +196,18 @@ function loadFromStorage() {
       :height="canvasSize"
       class="pixel-canvas"
     ></canvas>
+
+    <footer class="footer">
+      <p>
+        Made with ❤️ •
+        <a
+          href="https://github.com/darkobyte/TabTweak"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Visit GitHub Page</a
+        >
+      </p>
+    </footer>
   </div>
 </template>
 
@@ -286,5 +298,25 @@ h1 {
   border-color: #4caf50;
   border-width: 3px;
   transform: scale(1.1);
+}
+
+.footer {
+  margin-top: 40px;
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #eee;
+  color: #666;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #4caf50;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer a:hover {
+  color: #333;
+  text-decoration: underline;
 }
 </style>
