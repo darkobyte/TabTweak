@@ -30,7 +30,7 @@ let isDrawing = false;
 let canvasData = ref(
   Array(32)
     .fill()
-    .map(() => Array(32).fill("#ffffff")),
+    .map(() => Array(32).fill("#ffffff00")),
 );
 
 onMounted(() => {
@@ -85,7 +85,7 @@ function stopDrawing() {
 }
 
 function drawCanvas() {
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#ffffff00";
   ctx.fillRect(0, 0, canvasSize, canvasSize);
 
   for (let y = 0; y < 32; y++) {
@@ -118,7 +118,7 @@ function drawPixel(x, y, color) {
 function clearCanvas() {
   canvasData.value = Array(32)
     .fill()
-    .map(() => Array(32).fill("#ffffff"));
+    .map(() => Array(32).fill("#ffffff00"));
   drawCanvas();
 }
 
